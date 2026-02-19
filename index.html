@@ -18,6 +18,7 @@
       <canvas id="gameCanvas" width="400" height="600"></canvas>
 
       <div id="mainMenu" class="overlay">
+        <div id="menuCoinDisplay">KOIN: <span id="totalKoinMenu">0</span></div>
         <h1>FLAPPY BIRD</h1>
         <button onclick="startGame()">START</button>
         <button onclick="showScreen('charSelect')">PILIH KARAKTER</button>
@@ -91,8 +92,7 @@
           <p>
             Bantu burung melewati pipa hijau! <br /><br />
             Tekan Spasi atau Tombol JUMP untuk terbang. <br /><br />
-            Jangan menabrak pipa, jangan terbang terlalu tinggi atau jatuh ke
-            bawah!
+            Dapatkan koin untuk menambah koleksimu!
           </p>
         </div>
         <button onclick="showScreen('mainMenu')">KEMBALI</button>
@@ -103,7 +103,7 @@
       <div id="gameOverPopup" class="popup hidden">
         <h2>GAME OVER</h2>
         <p>Score: <span id="finalScore">0</span></p>
-         <p>Koin: <span id="finalCoin">0</span></p>
+        <p>Koin: <span id="finalCoin">0</span></p>
         <div class="popup-buttons">
           <button onclick="backToMenu()">MENU UTAMA</button>
           <button id="retryBtn">RETRY</button>
@@ -116,6 +116,7 @@
     <audio id="soundScore" src="assets/score.mp3"></audio>
     <audio id="soundDie" src="assets/die.mp3"></audio>
     <audio id="soundMenu" src="assets/menu.mp3"></audio>
+    <audio id="soundCoin" src="assets/koin.mp3"></audio>
 
     <script src="script.js"></script>
   </body>

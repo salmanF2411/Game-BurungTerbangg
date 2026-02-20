@@ -9,10 +9,13 @@ body {
   padding: 0;
   height: 100vh;
   width: 100vw;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-family: "Press Start 2P", cursive;
+
   overflow: hidden;
   touch-action: manipulation;
 }
@@ -30,85 +33,180 @@ canvas {
   background: #87ceeb;
 }
 
+/* =========================
+   MENU COIN DISPLAY
+========================= */
 #menuCoinDisplay {
   position: absolute;
   top: 20px;
   left: 20px;
-  color: #e3c505;
+
+  color: #ffd93d;
+
   font-size: 10px;
-  text-shadow: 2px 2px #000;
+
+  text-shadow:
+    2px 2px #000,
+    0 0 8px rgba(255, 217, 61, 0.5);
+
+  animation: fadeSlideDown 0.5s ease;
 }
 
+/* =========================
+   OVERLAY MENU
+========================= */
 .overlay {
   position: absolute;
+
   top: 0;
   left: 0;
+
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+
+  background: rgba(0, 0, 0, 0.65);
+
+  backdrop-filter: blur(6px);
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   color: white;
   text-align: center;
+
   z-index: 20;
+
+  animation: fadeIn 0.4s ease;
 }
 
+/* =========================
+   TITLE
+========================= */
 h1 {
   font-size: 22px;
   margin-bottom: 40px;
-  color: #e3c505;
+
+  color: #ffd93d;
+
+  text-shadow:
+    3px 3px #000,
+    0 0 12px rgba(255, 217, 61, 0.6);
+
+  animation: fadeSlideDown 0.6s ease;
 }
+
 h2 {
   font-size: 16px;
   margin-bottom: 20px;
+
+  text-shadow: 2px 2px #000;
 }
 
+/* =========================
+   GLOBAL BUTTON STYLE
+   (MENU + POPUP SAME STYLE)
+========================= */
 button {
-  background: #e3c505;
-  border: 4px solid #000;
-  padding: 12px 20px;
+  background: linear-gradient(145deg, #ffd93d, #ffb800);
+
+  border: none;
+
+  padding: 14px 22px;
   margin: 10px;
+
   font-family: "Press Start 2P", cursive;
   font-size: 10px;
+
+  border-radius: 10px;
+
   cursor: pointer;
+
+  color: #000;
+
+  box-shadow:
+    0 6px 0 #cc9400,
+    0 10px 18px rgba(0, 0, 0, 0.3);
+
+  transition: all 0.15s ease;
+
+  animation: fadeSlideUp 0.5s ease;
 }
 
+/* Hover */
+button:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 9px 0 #cc9400,
+    0 14px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* Click press effect */
+button:active {
+  transform: translateY(3px);
+
+  box-shadow:
+    0 3px 0 #cc9400,
+    0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================
+   CHARACTER SELECT
+========================= */
 .char-list {
   display: flex;
   gap: 15px;
+
   margin-bottom: 20px;
+
   flex-wrap: wrap;
   justify-content: center;
+
   padding: 10px;
+
   max-width: 90%;
 }
 
 .char-opt {
   width: 50px;
+
   cursor: pointer;
-  border: 4px solid transparent;
+
+  border-radius: 10px;
+
+  border: 3px solid transparent;
+
   padding: 5px;
+
+  transition: all 0.2s ease;
+}
+
+.char-opt:hover {
+  transform: scale(1.15);
 }
 
 .char-opt.selected {
-  border-color: #e3c505;
+  border-color: #ffd93d;
+
   background: rgba(255, 255, 255, 0.2);
+
+  box-shadow: 0 0 12px rgba(255, 217, 61, 0.8);
+
+  transform: scale(1.15);
 }
 
-.hidden {
-  display: none !important;
-}
-
+/* =========================
+   JUMP BUTTON MOBILE
+========================= */
 #jumpBtnMobile {
   position: fixed;
 
-  /* gunakan safe area agar tidak ketutup navbar mobile */
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  bottom: calc(40px + env(safe-area-inset-bottom));
   right: calc(20px + env(safe-area-inset-right));
 
-  width: 75px;
+  width: 85px;
   height: 75px;
 
   border-radius: 50%;
@@ -117,32 +215,186 @@ button {
 
   display: none;
 
-  opacity: 0.8;
+  font-size: 12px;
 
-  /* tambahan biar tidak ikut ter-scroll */
-  touch-action: manipulation;
+  box-shadow:
+    0 6px 0 #cc9400,
+    0 12px 25px rgba(0, 0, 0, 0.4);
+
+  opacity: 0.9;
 }
 
-/* khusus mobile */
+/* Mobile only */
 @media (max-width: 768px) {
   #jumpBtnMobile {
     display: block;
-
-    /* sedikit lebih ke atas untuk keamanan */
-    bottom: calc(40px + env(safe-area-inset-bottom));
   }
 }
 
+/* =========================
+   POPUP MODERN
+========================= */
 .popup {
-  position: absolute;
+  position: fixed;
+
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 30px;
-  border: 4px solid #000;
-  z-index: 30;
+
+  transform: translate(-50%, -50%) scale(0.85);
+
+  background: linear-gradient(145deg, #ffffff, #f3f3f3);
+
+  padding: 32px 28px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.35),
+    inset 0 2px 6px rgba(255, 255, 255, 0.8);
+
   text-align: center;
-  min-width: 200px;
-  color: black;
+
+  width: 320px;
+  max-width: 90vw;
+
+  color: #222;
+
+  z-index: 30;
+
+  animation: popupShow 0.35s ease forwards;
+}
+
+/* Judul GAME OVER (lebih besar & modern) */
+.popup h2 {
+  font-size: 26px;
+
+  margin-bottom: 18px;
+
+  color: #111;
+
+  letter-spacing: 2px;
+
+  text-shadow:
+    2px 2px #ccc,
+    0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Text score & coin */
+.popup p {
+  font-size: 15px;
+
+  margin: 8px 0;
+}
+
+/* Tombol container */
+.popup-buttons {
+  margin-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.5px;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes popupShow {
+  from {
+    transform: translate(-50%, -60%) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   HIDDEN
+========================= */
+.hidden {
+  display: none !important;
+}
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+@media (max-width: 768px) {
+  .popup {
+    width: 85vw;
+
+    max-width: 200px;
+
+    padding: 24px 18px;
+
+    border-radius: 16px;
+  }
+
+  .popup h2 {
+    font-size: 22px;
+
+    margin-bottom: 14px;
+  }
+
+  .popup p {
+    font-size: 13px;
+  }
+
+  .popup-buttons button {
+    font-size: 11px;
+
+    padding: 12px;
+  }
+}
+
+/* =========================
+   SMALL MOBILE (very small phones)
+========================= */
+@media (max-width: 400px) {
+  .popup {
+    width: 90vw;
+
+    padding: 20px 14px;
+  }
+
+  .popup h2 {
+    font-size: 20px;
+  }
+
+  .popup p {
+    font-size: 12px;
+  }
 }

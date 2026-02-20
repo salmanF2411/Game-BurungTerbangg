@@ -6,7 +6,7 @@ const bgImg = new Image();
 bgImg.src = "assets/background.png";
 
 const nightBgImg = new Image();
-nightBgImg.src = "assets/bgm.jpg";
+nightBgImg.src = "assets/bgm.jpeg";
 
 const pipeImg = new Image();
 pipeImg.src = "assets/pipe2-.png";

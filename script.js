@@ -28,6 +28,7 @@ birdImg.src = birdSkins[currentSkinIndex];
 
 /* SOUNDS */
 const bgm = document.getElementById("backgroundMusic");
+const soundMenuBg = document.getElementById("soundMenuBg");
 const soundFly = document.getElementById("soundFly");
 const soundScore = document.getElementById("soundScore");
 const soundDie = document.getElementById("soundDie");
@@ -35,42 +36,38 @@ const soundMenu = document.getElementById("soundMenu");
 const soundCoin = document.getElementById("soundCoin");
 
 bgm.volume = 0.3;
+soundMenuBg.volume = 0.4;
+
+/* OPTIONS & MUSIC STATE */
+// Mengambil setting terakhir atau default ke ON
+let isMusicOn = localStorage.getItem("musicSetting") === "off" ? false : true;
+document.getElementById("musicStatusText").innerText = isMusicOn ? "ON" : "OFF";
 
 /* ========================= */
-/* DAY NIGHT SYSTEM FIXED */
+/* DAY NIGHT SYSTEM */
 /* ========================= */
-
 let isNight = false;
 let lastCycleTime = Date.now();
 let lastFrameTime = Date.now();
-
 let bgAlpha = 0;
-
 const DAY_DURATION = 10000;
 const NIGHT_DURATION = 10000;
-
 const transitionSpeed = 0.5;
 
 /* DYNAMIC RESIZING */
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
   bird.x = canvas.width * 0.2;
 }
-
 window.addEventListener("resize", resizeCanvas);
 
 /* GAME STATE */
-
 let gameActive = false;
 let gameOver = false;
-
 let score = 0;
 let coinCount = 0;
-
 let frame = 0;
-
 let isNewBest = false;
 
 let totalKoinSaved = localStorage.getItem("totalKoin")
@@ -82,35 +79,27 @@ let bestScore = localStorage.getItem("bestScore")
   : 0;
 
 /* BIRD */
-
 let bird = {
   x: 80,
   y: 250,
-
   width: 40,
   height: 30,
-
   gravity: 0.5,
   jump: -8,
-
   speed: 0,
 };
 
 /* PIPE & COIN */
-
 let pipes = [];
 let coins = [];
-
 const pipeWidth = 60;
 const pipeGap = 160;
-
 const pipeSpeed = 2.5;
-
 const coinSize = 26;
 
 document.getElementById("totalKoinMenu").innerText = totalKoinSaved;
 
-/* NAVIGATION */
+/* NAVIGATION & MUSIC LOGIC */
 
 function playMenuSound() {
   soundMenu.currentTime = 0;
@@ -119,53 +108,76 @@ function playMenuSound() {
 
 function showScreen(screenId) {
   playMenuSound();
-
   document
     .querySelectorAll(".overlay")
     .forEach((el) => el.classList.add("hidden"));
-
   document.getElementById(screenId).classList.remove("hidden");
-
   document.getElementById("totalKoinMenu").innerText = totalKoinSaved;
 }
 
 function selectBird(index) {
   playMenuSound();
-
   currentSkinIndex = index;
-
   birdImg.src = birdSkins[index];
-
   document.querySelectorAll(".char-opt").forEach((img, i) => {
     img.classList.toggle("selected", i === index);
   });
 }
 
+function toggleMusic() {
+  playMenuSound();
+  isMusicOn = !isMusicOn;
+
+  if (isMusicOn) {
+    document.getElementById("musicStatusText").innerText = "ON";
+    localStorage.setItem("musicSetting", "on");
+    // Jika sedang di menu, putar musik menu
+    if (!gameActive) {
+      soundMenuBg.play().catch(() => {});
+    }
+  } else {
+    document.getElementById("musicStatusText").innerText = "OFF";
+    localStorage.setItem("musicSetting", "off");
+    soundMenuBg.pause();
+    bgm.pause();
+  }
+}
+
 function startGame() {
   playMenuSound();
 
-  document.getElementById("mainMenu").classList.add("hidden");
+  // Hentikan musik menu tanpa reset ke 0 agar transisi halus
+  soundMenuBg.pause();
 
+  document.getElementById("mainMenu").classList.add("hidden");
   resizeCanvas();
 
   gameActive = true;
   gameOver = false;
-
   lastCycleTime = Date.now();
   lastFrameTime = Date.now();
 
   resetGameStats();
 
-  bgm.play().catch(() => {});
+  if (isMusicOn) {
+    bgm.currentTime = 0; // Game music mulai dari awal
+    bgm.play().catch(() => {});
+  }
 }
 
 function backToMenu() {
   playMenuSound();
-
   gameActive = false;
   gameOver = false;
 
+  bgm.pause(); // Matikan musik gameplay
+
   document.getElementById("gameOverPopup").classList.add("hidden");
+
+  // Putar kembali musik menu jika setting ON
+  if (isMusicOn) {
+    soundMenuBg.play().catch(() => {});
+  }
 
   showScreen("mainMenu");
 }
@@ -174,18 +186,25 @@ function backToMenu() {
 
 function control() {
   if (!gameActive || gameOver) return;
-
   bird.speed = bird.jump;
-
   soundFly.currentTime = 0;
   soundFly.play();
 }
 
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") control();
+  if (e.code === "Space") {
+    // Aktifkan audio pada interaksi pertama jika setting ON
+    if (!gameActive && !gameOver && isMusicOn && soundMenuBg.paused) {
+      soundMenuBg.play().catch(() => {});
+    }
+    control();
+  }
 });
 
 canvas.addEventListener("click", () => {
+  if (!gameActive && !gameOver && isMusicOn && soundMenuBg.paused) {
+    soundMenuBg.play().catch(() => {});
+  }
   if (gameActive && !gameOver) control();
 });
 
@@ -198,17 +217,12 @@ document.getElementById("jumpBtnMobile").addEventListener("touchstart", (e) => {
 
 function spawnCoin(pipeX, gapTop, gapBottom) {
   if (Math.random() > 0.6) return;
-
   let centerGap = gapTop + (gapBottom - gapTop) / 2;
-
   let coinY = centerGap - coinSize / 2;
-
   coins.push({
     x: pipeX + pipeWidth / 2 - coinSize / 2,
     y: coinY,
-
     collected: false,
-
     angle: 0,
     scale: 1,
   });
@@ -216,17 +230,13 @@ function spawnCoin(pipeX, gapTop, gapBottom) {
 
 function createPipe() {
   let minH = 50;
-
   let maxH = canvas.height - pipeGap - minH;
-
   let topH = Math.floor(Math.random() * (maxH - minH) + minH);
 
   pipes.push({
     x: canvas.width,
     top: topH,
-
     bottom: canvas.height - topH - pipeGap,
-
     passed: false,
   });
 
@@ -239,13 +249,10 @@ function update() {
   if (!gameActive || gameOver) return;
 
   let now = Date.now();
-
   let deltaTime = (now - lastFrameTime) / 1000;
-
   lastFrameTime = now;
 
   /* DAY NIGHT TIMER */
-
   if (!isNight && now - lastCycleTime >= DAY_DURATION) {
     isNight = true;
     lastCycleTime = now;
@@ -255,19 +262,15 @@ function update() {
   }
 
   /* SMOOTH TRANSITION */
-
   if (isNight) {
     bgAlpha += transitionSpeed * deltaTime;
-
     if (bgAlpha > 1) bgAlpha = 1;
   } else {
     bgAlpha -= transitionSpeed * deltaTime;
-
     if (bgAlpha < 0) bgAlpha = 0;
   }
 
   /* PHYSICS */
-
   bird.speed += bird.gravity;
   bird.y += bird.speed;
 
@@ -280,16 +283,13 @@ function update() {
 
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       score++;
-
       pipe.passed = true;
-
+      soundScore.currentTime = 0;
       soundScore.play();
 
       if (score > bestScore) {
         bestScore = score;
-
         isNewBest = true;
-
         localStorage.setItem("bestScore", bestScore);
       }
     }
@@ -305,9 +305,7 @@ function update() {
 
   coins.forEach((coin) => {
     coin.x -= pipeSpeed;
-
     coin.angle += 0.1;
-
     coin.scale = Math.sin(coin.angle) * 0.3 + 0.7;
 
     if (
@@ -318,22 +316,16 @@ function update() {
       bird.y + bird.height > coin.y
     ) {
       coin.collected = true;
-
       coinCount++;
-
       totalKoinSaved++;
-
       localStorage.setItem("totalKoin", totalKoinSaved);
-
       soundCoin.currentTime = 0;
       soundCoin.play();
     }
   });
 
   pipes = pipes.filter((p) => p.x + pipeWidth > 0);
-
   coins = coins.filter((c) => !c.collected && c.x + coinSize > 0);
-
   frame++;
 }
 
@@ -341,24 +333,16 @@ function update() {
 
 function draw() {
   ctx.globalAlpha = 1;
-
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
   ctx.globalAlpha = bgAlpha;
-
   ctx.drawImage(nightBgImg, 0, 0, canvas.width, canvas.height);
-
   ctx.globalAlpha = 1;
 
   pipes.forEach((pipe) => {
     ctx.save();
-
     ctx.translate(pipe.x + pipeWidth / 2, pipe.top / 2);
-
     ctx.scale(1, -1);
-
     ctx.drawImage(pipeImg, -pipeWidth / 2, -pipe.top / 2, pipeWidth, pipe.top);
-
     ctx.restore();
 
     ctx.drawImage(
@@ -372,60 +356,41 @@ function draw() {
 
   coins.forEach((coin) => {
     ctx.save();
-
     ctx.translate(coin.x + coinSize / 2, coin.y + coinSize / 2);
-
     ctx.scale(coin.scale, 1);
-
     ctx.drawImage(coinImg, -coinSize / 2, -coinSize / 2, coinSize, coinSize);
-
     ctx.restore();
   });
 
   ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
   /* TEXT UI */
-
   if (gameActive) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 4;
-
     ctx.font = "10px 'Press Start 2P'";
-
     ctx.fillStyle = "#e3c505";
-
     ctx.textAlign = "left";
 
     ctx.strokeText("BEST SCORE:" + bestScore, 15, 30);
-
     ctx.fillText("BEST SCORE:" + bestScore, 15, 30);
 
     ctx.fillStyle = "#fff";
-
     ctx.strokeText("COIN: " + coinCount, 15, 50);
-
     ctx.fillText("COIN: " + coinCount, 15, 50);
 
     let fontSize = score > 99 ? "15px" : "25px";
-
     ctx.font = fontSize + " 'Press Start 2P'";
-
     ctx.textAlign = "center";
-
     ctx.strokeText(score, canvas.width / 2, 70);
-
     ctx.fillText(score, canvas.width / 2, 70);
 
     if (isNewBest) {
       ctx.font = "10px 'Press Start 2P'";
-
       ctx.fillStyle = "#00ff00";
-
       ctx.strokeText("NEW BEST SCORE!", canvas.width / 2, 100);
-
       ctx.fillText("NEW BEST SCORE!", canvas.width / 2, 100);
     }
-
     ctx.textAlign = "left";
   }
 }
@@ -434,15 +399,11 @@ function draw() {
 
 function endGame() {
   gameOver = true;
-
   bgm.pause();
-
   soundDie.play();
 
   document.getElementById("finalScore").innerText = score;
-
   document.getElementById("finalCoin").innerText = coinCount;
-
   document.getElementById("gameOverPopup").classList.remove("hidden");
 }
 
@@ -451,15 +412,11 @@ function endGame() {
 function resetGameStats() {
   bird.y = canvas.height / 2;
   bird.speed = 0;
-
   pipes = [];
   coins = [];
-
   score = 0;
   coinCount = 0;
-
   frame = 0;
-
   isNewBest = false;
 }
 
@@ -467,7 +424,7 @@ document.getElementById("retryBtn").addEventListener("click", () => {
   playMenuSound();
 
   document.getElementById("gameOverPopup").classList.add("hidden");
-
+  
   startGame();
 });
 
@@ -476,6 +433,15 @@ document.getElementById("retryBtn").addEventListener("click", () => {
 resizeCanvas();
 
 selectBird(0);
+
+// Play music on load if interaction exists
+window.addEventListener("load", () => {
+  if (isMusicOn) {
+    soundMenuBg.play().catch(() => {
+      console.log("Waiting for user interaction to play music.");
+    });
+  }
+});
 
 function gameLoop() {
   update();

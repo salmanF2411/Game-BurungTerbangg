@@ -23,6 +23,7 @@
         <button onclick="startGame()">START</button>
         <button onclick="showScreen('charSelect')">PILIH KARAKTER</button>
         <button onclick="showScreen('gameDesc')">MENU PENJELASAN</button>
+        <button onclick="showScreen('optionsMenu')">OPTIONS</button>
       </div>
 
       <div id="charSelect" class="overlay hidden">
@@ -58,25 +59,17 @@
             class="char-opt"
             id="opt5"
           />
-          <!-- <img
-            src="assets/g6.png"
-            onclick="selectBird(6)"
-            class="char-opt"
-            id="opt6"
-          />
-          <img
-            src="assets/g7.png"
-            onclick="selectBird(7)"
-            class="char-opt"
-            id="opt7"
-          />
-          <img
-            src="assets/g8.png"
-            onclick="selectBird(8)"
-            class="char-opt"
-            id="opt8"
-          /> -->
         </div>
+        <button onclick="showScreen('mainMenu')">KEMBALI</button>
+      </div>
+
+      <div id="optionsMenu" class="overlay hidden">
+        <h2>OPTIONS</h2>
+        <div class="options-content">
+          <p>MUSIK: <span id="musicStatusText">ON</span></p>
+          <button onclick="toggleMusic()">ON / OFF</button>
+        </div>
+        <br />
         <button onclick="showScreen('mainMenu')">KEMBALI</button>
       </div>
 
@@ -95,7 +88,7 @@
       <button id="jumpBtnMobile">JUMP</button>
 
       <div id="gameOverPopup" class="popup hidden">
-        <h2 sty>GAME OVER</h2>
+        <h2 style="margin-top: 10px">GAME OVER</h2>
         <p>Score: <span id="finalScore">0</span></p>
         <p>Koin : <span id="finalCoin">0</span></p>
         <div class="popup-buttons">
@@ -106,6 +99,7 @@
     </div>
 
     <audio id="backgroundMusic" src="assets/bgm.mp3" loop></audio>
+    <audio id="soundMenuBg" src="assets/backgroundMenu.mp3" loop></audio>
     <audio id="soundFly" src="assets/fly.mp3"></audio>
     <audio id="soundScore" src="assets/score.mp3"></audio>
     <audio id="soundDie" src="assets/die.mp3"></audio>

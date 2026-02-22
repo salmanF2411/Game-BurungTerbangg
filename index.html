@@ -30,36 +30,51 @@
       <div id="charSelect" class="overlay hidden">
         <h2>PILIH KARAKTER</h2>
         <div class="char-list">
-          <img
-            src="assets/Flappy-Bird.png"
-            onclick="selectBird(0)"
-            class="char-opt"
-            id="opt0"
-          />
-          <img
-            src="assets/Flappy-Bird2.png"
-            onclick="selectBird(1)"
-            class="char-opt"
-            id="opt1"
-          />
-          <img
-            src="assets/Flappy-Bird3.png"
-            onclick="selectBird(2)"
-            class="char-opt"
-            id="opt2"
-          />
-          <img
-            src="assets/g4-.png"
-            onclick="selectBird(3)"
-            class="char-opt"
-            id="opt4"
-          />
-          <img
-            src="assets/g5.png"
-            onclick="selectBird(4)"
-            class="char-opt"
-            id="opt5"
-          />
+          <div class="char-item">
+            <img
+              src="assets/Flappy-Bird.png"
+              onclick="selectBird(0)"
+              class="char-opt"
+              id="opt0"
+            />
+            <p class="char-price" id="price0">FREE</p>
+          </div>
+          <div class="char-item">
+            <img
+              src="assets/Flappy-Bird2.png"
+              onclick="selectBird(1)"
+              class="char-opt"
+              id="opt1"
+            />
+            <p class="char-price" id="price1">50</p>
+          </div>
+          <div class="char-item">
+            <img
+              src="assets/Flappy-Bird3.png"
+              onclick="selectBird(2)"
+              class="char-opt"
+              id="opt2"
+            />
+            <p class="char-price" id="price2">100</p>
+          </div>
+          <div class="char-item">
+            <img
+              src="assets/g4-.png"
+              onclick="selectBird(3)"
+              class="char-opt"
+              id="opt3"
+            />
+            <p class="char-price" id="price3">200</p>
+          </div>
+          <div class="char-item">
+            <img
+              src="assets/g5.png"
+              onclick="selectBird(4)"
+              class="char-opt"
+              id="opt4"
+            />
+            <p class="char-price" id="price4">500</p>
+          </div>
         </div>
         <button onclick="showScreen('mainMenu')">KEMBALI</button>
       </div>

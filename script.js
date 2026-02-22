@@ -22,6 +22,9 @@ const birdSkins = [
   "assets/g5.png",
 ];
 
+// HARGA KARAKTER
+const skinPrices = [0, 50, 100, 200, 500];
+
 let currentSkinIndex = 0;
 let birdImg = new Image();
 birdImg.src = birdSkins[currentSkinIndex];
@@ -39,7 +42,6 @@ bgm.volume = 0.3;
 soundMenuBg.volume = 0.4;
 
 /* OPTIONS & MUSIC STATE */
-// Mengambil setting terakhir atau default ke ON
 let isMusicOn = localStorage.getItem("musicSetting") === "off" ? false : true;
 document.getElementById("musicStatusText").innerText = isMusicOn ? "ON" : "OFF";
 
@@ -78,6 +80,11 @@ let bestScore = localStorage.getItem("bestScore")
   ? parseInt(localStorage.getItem("bestScore"))
   : 0;
 
+// SISTEM UNLOCK SKIN
+let unlockedSkins = localStorage.getItem("unlockedSkins")
+  ? JSON.parse(localStorage.getItem("unlockedSkins"))
+  : [true, false, false, false, false]; // Skin 0 selalu terbuka
+
 /* BIRD */
 let bird = {
   x: 80,
@@ -113,15 +120,66 @@ function showScreen(screenId) {
     .forEach((el) => el.classList.add("hidden"));
   document.getElementById(screenId).classList.remove("hidden");
   document.getElementById("totalKoinMenu").innerText = totalKoinSaved;
+
+  if (screenId === "charSelect") updateCharUI();
+}
+
+function updateCharUI() {
+  birdSkins.forEach((_, index) => {
+    const img = document.getElementById(`opt${index}`);
+    const priceText = document.getElementById(`price${index}`);
+
+    img.classList.toggle("selected", currentSkinIndex === index);
+
+    if (unlockedSkins[index]) {
+      // Jika sudah punya
+      if (currentSkinIndex === index) {
+        priceText.innerText = "DIPAKAI";
+        priceText.style.color = "#00ff00";
+      } else {
+        // Jika sudah punya tapi tidak dipakai, hilangkan teks (Milik dihapus)
+        priceText.innerText = "";
+      }
+      img.style.filter = "none";
+    } else {
+      // Jika belum punya, tampilkan harga
+      priceText.innerText = skinPrices[index] + " KOIN";
+      priceText.style.color = "#ffd93d";
+      img.style.filter = "grayscale(100%)";
+    }
+  });
 }
 
 function selectBird(index) {
-  playMenuSound();
-  currentSkinIndex = index;
-  birdImg.src = birdSkins[index];
-  document.querySelectorAll(".char-opt").forEach((img, i) => {
-    img.classList.toggle("selected", i === index);
-  });
+  if (unlockedSkins[index]) {
+    // Jika sudah punya, langsung pilih
+    playMenuSound();
+    currentSkinIndex = index;
+    birdImg.src = birdSkins[index];
+  } else {
+    // Jika belum punya, coba beli
+    if (totalKoinSaved >= skinPrices[index]) {
+      totalKoinSaved -= skinPrices[index];
+      unlockedSkins[index] = true;
+
+      // Simpan ke storage
+      localStorage.setItem("totalKoin", totalKoinSaved);
+      localStorage.setItem("unlockedSkins", JSON.stringify(unlockedSkins));
+
+      // Update UI koin di menu
+      document.getElementById("totalKoinMenu").innerText = totalKoinSaved;
+
+      soundCoin.currentTime = 0;
+      soundCoin.play();
+
+      // Otomatis pilih setelah beli
+      currentSkinIndex = index;
+      birdImg.src = birdSkins[index];
+    } else {
+      alert("Koin tidak cukup!");
+    }
+  }
+  updateCharUI();
 }
 
 function toggleMusic() {
@@ -131,7 +189,6 @@ function toggleMusic() {
   if (isMusicOn) {
     document.getElementById("musicStatusText").innerText = "ON";
     localStorage.setItem("musicSetting", "on");
-    // Jika sedang di menu, putar musik menu
     if (!gameActive) {
       soundMenuBg.play().catch(() => {});
     }
@@ -145,14 +202,10 @@ function toggleMusic() {
 
 function startGame() {
   playMenuSound();
-
-  // Hentikan musik menu tanpa reset ke 0 agar transisi halus
   soundMenuBg.pause();
-
   document.getElementById("mainMenu").classList.add("hidden");
   resizeCanvas();
 
-  // Tampilkan tombol JUMP hanya jika di mobile (lebar layar <= 768px)
   if (window.innerWidth <= 768) {
     document.getElementById("jumpBtnMobile").style.display = "block";
   } else {
@@ -167,7 +220,7 @@ function startGame() {
   resetGameStats();
 
   if (isMusicOn) {
-    bgm.currentTime = 0; // Game music mulai dari awal
+    bgm.currentTime = 0;
     bgm.play().catch(() => {});
   }
 }
@@ -176,24 +229,16 @@ function backToMenu() {
   playMenuSound();
   gameActive = false;
   gameOver = false;
-
-  bgm.pause(); // Matikan musik gameplay
-
-  // Sembunyikan tombol JUMP saat kembali ke menu
+  bgm.pause();
   document.getElementById("jumpBtnMobile").style.display = "none";
-
   document.getElementById("gameOverPopup").classList.add("hidden");
-
-  // Putar kembali musik menu jika setting ON
   if (isMusicOn) {
     soundMenuBg.play().catch(() => {});
   }
-
   showScreen("mainMenu");
 }
 
 /* CONTROL */
-
 function control() {
   if (!gameActive || gameOver) return;
   bird.speed = bird.jump;
@@ -203,7 +248,6 @@ function control() {
 
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
-    // Aktifkan audio pada interaksi pertama jika setting ON
     if (!gameActive && !gameOver && isMusicOn && soundMenuBg.paused) {
       soundMenuBg.play().catch(() => {});
     }
@@ -224,7 +268,6 @@ document.getElementById("jumpBtnMobile").addEventListener("touchstart", (e) => {
 });
 
 /* SPAWN */
-
 function spawnCoin(pipeX, gapTop, gapBottom) {
   if (Math.random() > 0.6) return;
   let centerGap = gapTop + (gapBottom - gapTop) / 2;
@@ -254,7 +297,6 @@ function createPipe() {
 }
 
 /* UPDATE */
-
 function update() {
   if (!gameActive || gameOver) return;
 
@@ -262,7 +304,6 @@ function update() {
   let deltaTime = (now - lastFrameTime) / 1000;
   lastFrameTime = now;
 
-  /* DAY NIGHT TIMER */
   if (!isNight && now - lastCycleTime >= DAY_DURATION) {
     isNight = true;
     lastCycleTime = now;
@@ -271,7 +312,6 @@ function update() {
     lastCycleTime = now;
   }
 
-  /* SMOOTH TRANSITION */
   if (isNight) {
     bgAlpha += transitionSpeed * deltaTime;
     if (bgAlpha > 1) bgAlpha = 1;
@@ -280,7 +320,6 @@ function update() {
     if (bgAlpha < 0) bgAlpha = 0;
   }
 
-  /* PHYSICS */
   bird.speed += bird.gravity;
   bird.y += bird.speed;
 
@@ -290,20 +329,17 @@ function update() {
 
   pipes.forEach((pipe) => {
     pipe.x -= pipeSpeed;
-
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       score++;
       pipe.passed = true;
       soundScore.currentTime = 0;
       soundScore.play();
-
       if (score > bestScore) {
         bestScore = score;
         isNewBest = true;
         localStorage.setItem("bestScore", bestScore);
       }
     }
-
     if (
       bird.x < pipe.x + pipeWidth &&
       bird.x + bird.width > pipe.x &&
@@ -340,7 +376,6 @@ function update() {
 }
 
 /* DRAW */
-
 function draw() {
   ctx.globalAlpha = 1;
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
@@ -354,7 +389,6 @@ function draw() {
     ctx.scale(1, -1);
     ctx.drawImage(pipeImg, -pipeWidth / 2, -pipe.top / 2, pipeWidth, pipe.top);
     ctx.restore();
-
     ctx.drawImage(
       pipeImg,
       pipe.x,
@@ -374,27 +408,22 @@ function draw() {
 
   ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
-  /* TEXT UI */
   if (gameActive) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 4;
     ctx.font = "10px 'Press Start 2P'";
     ctx.fillStyle = "#e3c505";
     ctx.textAlign = "left";
-
     ctx.strokeText("BEST SCORE:" + bestScore, 15, 30);
     ctx.fillText("BEST SCORE:" + bestScore, 15, 30);
-
     ctx.fillStyle = "#fff";
     ctx.strokeText("COIN: " + coinCount, 15, 50);
     ctx.fillText("COIN: " + coinCount, 15, 50);
-
     let fontSize = score > 99 ? "15px" : "25px";
     ctx.font = fontSize + " 'Press Start 2P'";
     ctx.textAlign = "center";
     ctx.strokeText(score, canvas.width / 2, 70);
     ctx.fillText(score, canvas.width / 2, 70);
-
     if (isNewBest) {
       ctx.font = "10px 'Press Start 2P'";
       ctx.fillStyle = "#00ff00";
@@ -405,19 +434,14 @@ function draw() {
   }
 }
 
-/* END GAME */
-
 function endGame() {
   gameOver = true;
   bgm.pause();
   soundDie.play();
-
   document.getElementById("finalScore").innerText = score;
   document.getElementById("finalCoin").innerText = coinCount;
   document.getElementById("gameOverPopup").classList.remove("hidden");
 }
-
-/* RESET */
 
 function resetGameStats() {
   bird.y = canvas.height / 2;
@@ -432,32 +456,23 @@ function resetGameStats() {
 
 document.getElementById("retryBtn").addEventListener("click", () => {
   playMenuSound();
-
   document.getElementById("gameOverPopup").classList.add("hidden");
-
   startGame();
 });
 
-/* INIT */
-
 resizeCanvas();
+// Jalankan update UI karakter saat pertama kali load
+updateCharUI();
 
-selectBird(0);
-
-// Play music on load if interaction exists
 window.addEventListener("load", () => {
   if (isMusicOn) {
-    soundMenuBg.play().catch(() => {
-      console.log("Waiting for user interaction to play music.");
-    });
+    soundMenuBg.play().catch(() => {});
   }
 });
 
 function gameLoop() {
   update();
   draw();
-
   requestAnimationFrame(gameLoop);
 }
-
 gameLoop();

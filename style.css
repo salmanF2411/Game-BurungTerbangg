@@ -220,29 +220,39 @@ button:active {
 }
 
 /* =========================
-   JUMP BUTTON MOBILE
+   JUMP & SKILL BUTTON MOBILE
 ========================= */
 #jumpBtnMobile {
   position: fixed;
-
   bottom: calc(40px + env(safe-area-inset-bottom));
   right: calc(20px + env(safe-area-inset-right));
-
   width: 85px;
   height: 75px;
-
   border-radius: 50%;
-
   z-index: 50;
-
   display: none;
-
   font-size: 12px;
-
   box-shadow:
     0 6px 0 #cc9400,
     0 12px 25px rgba(0, 0, 0, 0.4);
+  opacity: 0.9;
+}
 
+#skillBtnMobile {
+  position: fixed;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  left: calc(20px + env(safe-area-inset-left));
+  width: 85px;
+  height: 75px;
+  border-radius: 50%;
+  z-index: 50;
+  display: none;
+  font-size: 11px;
+  background: linear-gradient(145deg, #ff4d4d, #cc0000);
+  box-shadow:
+    0 6px 0 #800000,
+    0 12px 25px rgba(0, 0, 0, 0.4);
+  color: white;
   opacity: 0.9;
 }
 
@@ -253,6 +263,13 @@ button:active {
     transform: translateY(4px) scale(0.95);
     box-shadow:
       0 2px 0 #cc9400,
+      0 5px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  #skillBtnMobile:active {
+    transform: translateY(4px) scale(0.95);
+    box-shadow:
+      0 2px 0 #800000,
       0 5px 10px rgba(0, 0, 0, 0.3);
   }
 }
